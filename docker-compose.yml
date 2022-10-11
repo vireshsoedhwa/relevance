@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  relevancedb:
+    image: postgres:alpine
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST=relevancedb
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+    networks:
+      relevance-network:   
+
+  app:
+    command: python manage.py runserver 0.0.0.0:8000
+    image: relevance
+    build:
+      context: .
+    volumes:
+      - .:/code
+    environment:
+      - DEBUG=1
+      - DJANGO_SECRET_KEY=WOOOOOOOOWOOOOOOOOWWW
+      - POSTGRES_HOST=relevancedb
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin
+    ports:
+      - "8000:8000"
+    depends_on:
+      - relevancedb
+    networks:
+      relevance-network:
+
+volumes:
+  db:
+
+networks:
+  relevance-network:
+    driver: bridge
+    name: relevance-network
